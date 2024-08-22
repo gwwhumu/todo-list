@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo List</title>
+    <style>
+      body {
+        text-align: center;
+      }
+      ul {
+        list-style-type: none;
+      }
+      li {
+        padding: 2px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      span {
+        flex-grow: 1;
+        text-align: left;
+      }
+      .completed {
+        text-decoration: line-through;
+        color: #888;
+      }
+      .category-tag {
+        background-color: #00fd54;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Todo List</h1>
+    <form id="add-form">
+      <input type="text" id="new-todo" placeholder="Enter a new todo" />
+      <select id="new-category">
+        <option value="work">Work</option>
+        <option value="personal">Personal</option>
+        <option value="shopping">Shopping</option>
+        <option value="other">Other</option>
+      </select>
+      <button type="submit">Add</button>
+    </form>
+    <div>
+      <span>Filter by categories:</span>
+      <select id="select-category">
+        <option value="all">All</option>
+        <option value="work">Work</option>
+        <option value="personal">Personal</option>
+        <option value="shopping">Shopping</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <ul id="todo-list"></ul>
+
+    <script>
+      const addForm = document.getElementById("add-form");
+      const newTodoInput = document.getElementById("new-todo");
+      const newCategory = document.getElementById("new-category");
+      const selectCategory = document.getElementById("select-category");
+      const todoList = document.getElementById("todo-list");
+
+      const todos = JSON.parse(localStorage.getItem("todos"));
+      function saveTodo() {
+        localStorage.setItem("todos", JSON.stringify(todos));
+      }
+
+      function renderTodo() {
+        todoList.innerHTML = "";
+        const selectedCategory = selectCategory.value;
+        todos.forEach((todo, index) => {
+          if (
+            selectedCategory === "all" ||
+            todo.category === selectedCategory
+          ) {
+            const li = document.createElement("li");
+            li.innerHTML = `
+              <input type="checkbox" ${
+                todo.completed ? "checked" : ""
+              } onchange="toggleTodo(${index})">
+               <span class=${
+                 todo.completed ? "completed" : ""
+               }><span class=category-tag>${todo.category}</span> ${
+              todo.text
+            }</span>
+            <div>
+               <button onclick="editTodo(${index})">Edit</button>
+               <button onclick="deleteTodo(${index})">Delete</button>
+            </div>
+            `;
+            todoList.appendChild(li);
+          }
+        });
+      }
+
+      function addTodo(text, category) {
+        todos.push({ text, category, completed: false });
+        saveTodo();
+        renderTodo();
+      }
+
+      addForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const newTodo = newTodoInput.value.trim();
+        const category = newCategory.value;
+        if (newTodo) {
+          addTodo(newTodo, category);
+          newTodoInput.value = "";
+          newTodoInput.focus();
+        }
+      });
+
+      selectCategory.addEventListener("change", renderTodo);
+
+      function deleteTodo(index) {
+        todos.splice(index, 1);
+        saveTodo();
+        renderTodo();
+      }
+
+      function editTodo(index) {
+        const newText = prompt("Edit todo:", todos[index].text);
+        if (newText !== null) {
+          const newCategory = prompt(
+            "Edit category:(work, personal, shopping, other)",
+            todos[index].category
+          );
+          if (
+            newCategory !== null &&
+            ["work", "personal", "shopping", "other"].includes(newCategory)
+          ) {
+            todos[index].text = newText;
+            todos[index].category = newCategory;
+          }
+        }
+        saveTodo();
+        renderTodo();
+      }
+
+      function toggleTodo(index) {
+        todos[index].completed = !todos[index].completed;
+        saveTodo();
+        renderTodo();
+      }
+
+      renderTodo();
+    </script>
+  </body>
+</html>
