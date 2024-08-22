@@ -63,7 +63,12 @@
       const selectCategory = document.getElementById("select-category");
       const todoList = document.getElementById("todo-list");
 
-      const todos = JSON.parse(localStorage.getItem("todos"));
+      let todos = JSON.parse(localStorage.getItem("todos")) || [
+        { text: "学习", category: "personal", completed: false },
+        { text: "休息", category: "other", completed: false },
+        { text: "买东西", category: "shopping", completed: false },
+        { text: "打卡", category: "work", completed: true },
+      ];
       function saveTodo() {
         localStorage.setItem("todos", JSON.stringify(todos));
       }
